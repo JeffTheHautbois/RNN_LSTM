@@ -2,11 +2,12 @@ import pandas as pd
 import numpy as np
 from numpy import random
 #pd generate timestamp obj
-rng = pd.date_range (start='1/1/2018', periods=145, freq="D")
+length = 144
+rng = pd.date_range (start='1/1/2018', periods=length, freq="D")
 
 cost = []
 #hacky generate transcact history
-for i in range (0,145):
+for i in range (0,length):
     if (rng[i].dayofweek == 0):
         price = 2.29 + i/100
         cost.append(round(price,2))
@@ -31,4 +32,8 @@ for i in range (0,145):
 dft = pd.DataFrame(rng,columns= ["date"])
 dft["cost"] = pd.DataFrame(cost)
 file_name = "spending.csv"
-dft.to_csv(file_name,encoding='utf-8', index=False)
+#dft.to_csv(file_name,encoding='utf-8', index=False)
+
+dataframe = pd.read_csv(file_name, engine='python')
+dataset = dataframe.values
+dataset = dataset.astype('float32')

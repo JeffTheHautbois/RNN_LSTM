@@ -6,6 +6,8 @@ import math
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
+from keras.layers import Activation
+from keras.layers import Dropout
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 
@@ -13,7 +15,7 @@ from sklearn.metrics import mean_squared_error
 numpy.random.seed(7)
 
 # load the dataset
-dataframe = pandas.read_csv('international-airline-passengers.csv', usecols=[1], engine='python', skipfooter=3)
+dataframe = pandas.read_csv('spending.csv', usecols=[1], engine='python')
 dataset = dataframe.values
 dataset = dataset.astype('float32')
 
@@ -37,18 +39,24 @@ def create_dataset(dataset, look_back=1):
 	return numpy.array(dataX), numpy.array(dataY)
 
 # reshape into X=t and Y=t+1
-look_back = 1
+look_back = 6
 trainX, trainY = create_dataset(train, look_back)
 testX, testY = create_dataset(test, look_back)
 
 # reshape input to be [samples, time steps, features]
+
 trainX = numpy.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
 testX = numpy.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
 
 # create and fit the LSTM network
+
 model = Sequential()
-model.add(LSTM(4, input_shape=(1, look_back)))
+model.add(LSTM(4, input_shape=(1, look_back),return_sequences=True))
+model.add(Dropout(0.5))
+model.add(LSTM(256))
+model.add(Dropout(0.5))
 model.add(Dense(1))
+model.add(Activation("linear"))
 model.compile(loss='mean_squared_error', optimizer='adam')
 model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
 
