@@ -32,8 +32,8 @@ for i in range (0,length):
 dft = pd.DataFrame(rng,columns= ["date"])
 dft["cost"] = pd.DataFrame(cost)
 file_name = "spending.csv"
-#dft.to_csv(file_name,encoding='utf-8', index=False)
+dft.to_csv(file_name,encoding='utf-8', index=False)
 
-dataframe = pd.read_csv(file_name, engine='python')
-dataset = dataframe.values
-dataset = dataset.astype('float32')
+#dataframe = pd.read_csv(file_name, engine='python')
+#dataset = dataframe.values
+#dataset = dataset.astype('float32')
