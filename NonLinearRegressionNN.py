@@ -11,7 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 numpy.random.seed(7)
 
 # load the dataset
-dataframe = pandas.read_csv('spending.csv', usecols=[1], engine='python')
+dataframe = pandas.read_csv('spendingNoisy.csv', usecols=[1], engine='python')
 dataset = dataframe.values
 dataset = dataset.astype('float32')
 
