@@ -15,7 +15,7 @@ from sklearn.metrics import mean_squared_error
 numpy.random.seed(7)
 
 # load the dataset
-dataframe = pandas.read_csv('spending_lunch.csv', usecols=[1], engine='python')
+dataframe = pandas.read_csv('spending_breakfast.csv', usecols=[1], engine='python')
 dataset = dataframe.values
 dataset = dataset.astype('float32')
 
@@ -83,8 +83,8 @@ testPredictPlot = numpy.empty_like(dataset)
 testPredictPlot[:, :] = numpy.nan
 testPredictPlot[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :] = testPredict
 # plot baseline and predictions
-temp = scaler.inverse_transform(dataset)
-plt.plot(temp[94:143,:])
-#plt.plot(trainPredictPlot)
+#temp = scaler.inverse_transform(dataset)
+#plt.plot(temp[94:143,:])
+plt.plot(trainPredictPlot)
 plt.plot(testPredictPlot)
 plt.show()
