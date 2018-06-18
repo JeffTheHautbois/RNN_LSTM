@@ -2,6 +2,7 @@
 import numpy
 import pandas
 import matplotlib.pyplot as plt
+from keras.models import load_model
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import Activation
@@ -11,7 +12,7 @@ from sklearn.preprocessing import MinMaxScaler
 numpy.random.seed(7)
 
 # load the dataset
-dataframe = pandas.read_csv('spendingNoisy.csv', usecols=[1], engine='python')
+dataframe = pandas.read_csv('spending_breakfast.csv', usecols=[1], engine='python')
 dataset = dataframe.values
 dataset = dataset.astype('float32')
 
@@ -48,8 +49,8 @@ model.add(Activation("linear"))
 model.add(Dense(32,activation='relu'))
 model.add(Activation("linear"))
 model.add(Dense(16,activation='relu'))
+model.add(Activation("linear"))
 model.add(Dense(1))
-
 model.compile(loss='mse', optimizer='adam', metrics=["accuracy"])
 model.fit(trainX, trainY, nb_epoch=256, batch_size=2, verbose=2)
 # make predictions
@@ -62,11 +63,23 @@ trainY = Yscaler.inverse_transform(trainY)
 testPredict = Yscaler.inverse_transform(testPredict)
 testY = Yscaler.inverse_transform(testY)
 
-plt.plot(testY)
-plt.plot(testPredict)
+def generateAxis (trainlen,testlen):
+	x1 = []
+	x2 = []
+	for i in range (0,trainlen):
+		x1.append(i)
+
+	for j in range (trainlen,testlen+trainlen):
+		x2.append(j)
+
+	return x1, x2
+axisX1, axisX2 = generateAxis(len(trainY),len(testY))
+plt.plot(axisX1,trainY)
+plt.plot(axisX2,testPredict)
+print(testPredict)
 plt.show()
 
-
+model.save('NonLinear_breakfast.h5')
 
 
 
