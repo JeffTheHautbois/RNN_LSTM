@@ -1,5 +1,9 @@
 import numpy
 import matplotlib.pyplot as plt
+from matplotlib import dates
+from matplotlib.dates import MO, TU, WE, TH, FR, SA, SU
+import datetime
+import seaborn as sns
 import pandas
 import math
 from keras.models import load_model
@@ -26,13 +30,13 @@ def loadModel(modelname):
     else:
         return model, False
 
-model, isLSTM = loadModel(lstmlu)
+model, isLSTM = loadModel(nllu)
 
 # fix random seed for reproducibility
 numpy.random.seed(7)
 
 # load the dataset
-dataframe = pandas.read_csv(csvlu, usecols=[1], engine='python')
+dataframe = pandas.read_csv(csvlu, index_col=0, engine='python',parse_dates=True)
 dataset = dataframe.values
 dataset = dataset.astype('float32')
 
@@ -115,14 +119,48 @@ if isLSTM:
     testPredictPlot[:, :] = numpy.nan
     testPredictPlot[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :] = testPredict
     # plot baseline and predictions
-    plt.plot(data=scaler.inverse_transform(dataset), marker='o', color='orchid')
-    plt.plot(data=trainPredictPlot, marker='o', color='lightcoral')
-    plt.plot(data=testPredictPlot, marker='o', color='mediumseagreen')
+
+    ogdf = dataframe
+    #convert from 2d to 1d nparray
+    trainPredictCost = trainPredictPlot.flatten()
+    traindf = pandas.DataFrame({'cost':trainPredictCost})
+    traindf.index = ogdf.index
+
+    testPredictCost = testPredictPlot.flatten()
+    testdf = pandas.DataFrame({'cost':testPredictCost})
+    testdf.index = ogdf.index
+
+    print(testPredictPlot)
+    ogdf['cost'].plot(markersize=6, marker='o', color='dimgray', linestyle=':',label='Original Spending ($)')
+    traindf['cost'].plot(markersize=6, marker='o', color='darkorange',linestyle='-',label='Training Set Predicted Spending ($)')
+    testdf['cost'].plot(markersize=6, marker='o', color='mediumseagreen',linestyle='-.',label="Testing Set Predicted Spending ($)")
+    ax = plt.gcf().axes[0]
+    fig = plt.gcf()
+    fig.set_size_inches(16,7, forward=True)
+    #axis tick formatting
+    min_loc = dates.WeekdayLocator(byweekday=SU)
+    ax.xaxis.set_minor_locator(min_loc)
+    min_fmt = dates.DateFormatter('%d\n%a')
+    ax.xaxis.set_minor_formatter(min_fmt)
+    ax.xaxis.set_major_locator(dates.MonthLocator())
+    ax.xaxis.set_major_formatter(dates.DateFormatter('\n\n\n%b'))
+
+    #grid formatting
+    #sns.set_style("darkgrid")
+    plt.style.use(u'seaborn-talk')
+    ax.xaxis.grid(True, which='minor')
+    ax.yaxis.grid()
+    plt.xlabel('Date')
+    plt.ylabel('Spending ($)')
+    plt.title('Spending Prediction - LSTM')
+    plt.legend()
+    #https://stackoverflow.com/questions/23644020/matplotlib-string-to-dates
     plt.show()
+
 
 else:
     # make predictions
-    trainPredict = model.predict(datasetX)
+    trainPredict = model.predict(trainX)
     testPredict = model.predict(testX)
 
     # invert predictions
@@ -131,18 +169,47 @@ else:
     testPredict = Yscaler.inverse_transform(testPredict)
     testY = Yscaler.inverse_transform(testY)
 
-    def generateAxis (trainlen,testlen):
-        x1 = []
-        x2 = []
-        for i in range (0,trainlen):
-            x1.append(i)
+    trainPredictPlot = numpy.empty_like(dataset)
+    trainPredictPlot[:, :] = numpy.nan
+    trainPredictPlot[0:len(trainPredict), :] = trainPredict
 
-        for j in range (trainlen,testlen+trainlen):
-            x2.append(j)
+    testPredictPlot = numpy.empty_like(dataset)
+    testPredictPlot[:, :] = numpy.nan
+    testPredictPlot[len(trainPredict):len(dataset), :] = testPredict
 
-        return x1, x2
-    axisX1, axisX2 = generateAxis(len(trainY),len(testY))
-    plt.plot(axisX1,trainY)
-    plt.plot(axisX2,testPredict)
-    print(testPredict)
+    ogdf = dataframe
+    #convert from 2d to 1d nparray
+    trainPredictCost = trainPredictPlot.flatten()
+    traindf = pandas.DataFrame({'cost':trainPredictCost})
+    traindf.index = ogdf.index
+
+    print(traindf)
+    testPredictCost = testPredictPlot.flatten()
+    testdf = pandas.DataFrame({'cost':testPredictCost})
+    testdf.index = ogdf.index
+    #print(testPredict)
+    ogdf['cost'].plot(markersize=6, marker='o', color='dimgray', linestyle=':',label='Original Spending ($)')
+    traindf['cost'].plot(markersize=6, marker='o', color='darkorange',linestyle='-',label='Training Set Predicted Spending ($)')
+    testdf['cost'].plot(markersize=6, marker='o', color='mediumseagreen',linestyle='-.',label="Testing Set Predicted Spending ($)")
+    ax = plt.gcf().axes[0]
+    fig = plt.gcf()
+    fig.set_size_inches(16,7, forward=True)
+    #axis tick formatting
+    min_loc = dates.WeekdayLocator(byweekday=SU)
+    ax.xaxis.set_minor_locator(min_loc)
+    min_fmt = dates.DateFormatter('%d\n%a')
+    ax.xaxis.set_minor_formatter(min_fmt)
+    ax.xaxis.set_major_locator(dates.MonthLocator())
+    ax.xaxis.set_major_formatter(dates.DateFormatter('\n\n\n%b'))
+
+    #grid formatting
+    #sns.set_style("darkgrid")
+    plt.style.use(u'seaborn-talk')
+    ax.xaxis.grid(True, which='minor')
+    ax.yaxis.grid()
+    plt.xlabel('Date')
+    plt.ylabel('Spending ($)')
+    plt.title('Spending Prediction - Non Linear Regression')
+    plt.legend()
+    #https://stackoverflow.com/questions/23644020/matplotlib-string-to-dates
     plt.show()
