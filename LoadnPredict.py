@@ -115,9 +115,9 @@ if isLSTM:
     testPredictPlot[:, :] = numpy.nan
     testPredictPlot[len(trainPredict)+(look_back*2)+1:len(dataset)-1, :] = testPredict
     # plot baseline and predictions
-    plt.plot(scaler.inverse_transform(dataset))
-    plt.plot(trainPredictPlot)
-    plt.plot(testPredictPlot)
+    plt.plot(data=scaler.inverse_transform(dataset), marker='o', color='orchid')
+    plt.plot(data=trainPredictPlot, marker='o', color='lightcoral')
+    plt.plot(data=testPredictPlot, marker='o', color='mediumseagreen')
     plt.show()
 
 else:
